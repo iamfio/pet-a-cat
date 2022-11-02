@@ -1,7 +1,5 @@
 import Phaser from "phaser";
 import LabelContainer from "../ui/LabelContainer";
-import ScoreLabel from "../ui/ScoreLabel";
-// import TimeLabel from "../ui/TimeLabel";
 import CatSpawner from "./spawner/CatSpawner";
 
 const PLAYER_KEY = "player";
@@ -10,10 +8,15 @@ const CAT_KEY = "cat";
 export default class GameScene extends Phaser.Scene {
   constructor() {
     super("game-scene");
+
+    this.platforms = undefined;
     this.player = undefined;
     this.cursors = undefined;
     this.catSpawner = undefined;
-    this.scoreLabel = undefined;
+    this.catX = undefined;
+    this.catY = undefined;
+    this.catsGroup = undefined;
+    this.gameTime = undefined;
   }
 
   init(data) {
@@ -31,8 +34,8 @@ export default class GameScene extends Phaser.Scene {
 
     this.load.spritesheet(CAT_KEY, "sprites/cats/whitecat.png", {
       frameWidth: 32,
-      frameHeight: 32
-    })
+      frameHeight: 32,
+    });
 
     this.load.image("tiles", "tilesets/jungle_terrain.png");
     this.load.tilemapTiledJSON("map", "tilemaps/level-00.json");
@@ -48,31 +51,45 @@ export default class GameScene extends Phaser.Scene {
 
     const map = this.make.tilemap({ key: "map" });
     const tileset = map.addTilesetImage("jungle_terrain", "tiles");
-    const platforms = map.createLayer("Platforms", tileset, 0, 0);
+    this.platforms = map.createLayer("Platforms", tileset, 0, 0);
     map.createLayer("Overlays", tileset, 0, 0);
 
-    platforms.setCollisionByExclusion([-1], true);
-    platforms.setBlendMode("SCREEN");
+    this.platforms.setCollisionByExclusion([-1], true);
+    this.platforms.setBlendMode("SCREEN");
 
     this.player = this.#createPlayer();
-    this.cat = this.#createCat();
-    this.scoreLabel = this.#createScoreLabel(16, 16, 0)
-    this.timeLabel = this.#createTimeLabel(264, 16, 0)
 
-    
+    // new coordinates for the new cat respawn
+    this.#setRandomCatCoordinates();
+
+    this.scoreLabel = this.#createTextabel(16, 16, "Score", 0);
+    this.timeLabel = this.#createTextabel(264, 16, "Time", 0);
+
     this.cursors = this.input.keyboard.createCursorKeys();
-    
+
     this.catSpawner = new CatSpawner(this, CAT_KEY);
-    const catsGroup = this.catSpawner.group;
-    
+    this.catsGroup = this.catSpawner.group;
+    this.catSpawner.spawn(this.player.x);
+
     // Colliders
-    this.physics.add.collider(this.player, platforms);
-    this.physics.add.collider(this.cat, platforms);
-    this.physics.add.collider(catsGroup, platforms);
-    this.physics.add.collider(this.player, this.cat, this.#petCat, null, this);
+    this.physics.add.collider(this.player, this.platforms);
+    this.physics.add.collider(this.catsGroup, this.platforms);
+    this.physics.add.collider(
+      this.player,
+      this.catsGroup,
+      this.#petCat,
+      null,
+      this
+    );
   }
 
   update() {
+    this.gameTime = this.sys.game.loop.time.toFixed(0).toString();
+    this.timeLabel.setTextValue(this.gameTime);
+
+    this.#setRandomCatCoordinates()
+
+    // Player Movements
     if (this.cursors.left.isDown) {
       this.player.setVelocityX(-200);
       this.player.play("left", true);
@@ -92,8 +109,6 @@ export default class GameScene extends Phaser.Scene {
       this.player.setVelocityY(-350);
       this.player.play("jump", true);
     }
-
-    this.cat.play("turn", true)
   }
 
   #createPlayer() {
@@ -127,58 +142,27 @@ export default class GameScene extends Phaser.Scene {
     return player;
   }
 
-  #createCat() {
-    // const cat = this.physics.add.sprite(0, 0, CAT_KEY);
-    const cat = this.physics.add.sprite(80, 650, CAT_KEY);
-    cat.setBounce(0.1);
-    cat.setCollideWorldBounds(true);
-    cat.scale *= 1.5;
-
-    this.anims.create({
-      key: "left",
-      frames: this.anims.generateFrameNumbers(CAT_KEY, { start: 0, end: 1 }),
-      frameRate: 5,
-      repeat: -1,
-    });
-
-    this.anims.create({
-      key: "right",
-      frames: this.anims.generateFrameNumbers(CAT_KEY, { start: 4, end: 5 }),
-      frameRate: 5,
-      repeat: -1,
-    });
-
-    this.anims.create({
-      key: "turn",
-      frames: [{ key: CAT_KEY, frame: 6 }],
-    })
-
-    return cat;
-  }
 
   #petCat(player, cat) {
-    // player.setTint(0x155437);
-    cat.disableBody(true, true)
+    cat.destroy();
 
-    this.scoreLabel.add(1)
+    this.scoreLabel.add(1);
+    this.catSpawner.spawn(player.x, this.catY);
+
+    this.physics.add.collider(cat, this.player, this.#petCat, null, this);
   }
 
-  #createScoreLabel(x, y, score) {
-    const style = { fontSize: "36px", fill: "#fff"}
-    const label = new LabelContainer(this, x, y, "Score", score, style);
+  #createTextabel(x, y, labelText, value) {
+    const style = { fontSize: "36px", fill: "#fff" };
+    const label = new LabelContainer(this, x, y, labelText, value, style);
 
-    this.add.existing(label)
+    this.add.existing(label);
 
-    return label
+    return label;
   }
 
-  #createTimeLabel(x, y, score) {
-    const style = { fontSize: "36px", fill: "#fff"}
-    const label = new LabelContainer(this, x, y, "Time", score, style);
-    // const label = new ScoreLabel(this, x, y, "Score", score, style);
-
-    this.add.existing(label)
-
-    return label
+  #setRandomCatCoordinates() {
+    this.catX = Phaser.Math.Between(0, 1024);
+    this.catY = Phaser.Math.Between(0, 650);
   }
 }

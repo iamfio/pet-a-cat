@@ -1,7 +1,5 @@
 import { formatText } from "../utils/formatText";
 import Phaser from "phaser";
-// import GameTextLabel from "./GameTextLabel";
-
 
 export default class LabelContainer extends Phaser.GameObjects.Text {
   constructor(scene, x, y, labelText, value, style) {
@@ -11,16 +9,16 @@ export default class LabelContainer extends Phaser.GameObjects.Text {
     this.value = value;
   }
 
-  setScore(score) {
-    this.value = score;
-    this.#updateScoreText()
+  setTextValue(textValue) {
+    this.value = textValue;
+    this.#updateTextValue()
   }
-
+  
   add(points) {
-    this.setScore(this.value + points)
+    this.setTextValue(this.value + points)
   }
 
-  #updateScoreText() {
+  #updateTextValue() {
     this.setText(formatText(this.labelText, this.value))
   }
 }

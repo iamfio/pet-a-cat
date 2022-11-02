@@ -1,6 +1,5 @@
 import Phaser from 'phaser'
 import GameScene from './scenes/GameScene'
-
 import IntroScene from './scenes/IntroScene'
 
 const config = {
@@ -22,7 +21,8 @@ const config = {
 			debugStaticBodyColor: 0xfff
 		},
 	},
-	scene: [IntroScene, GameScene],
+	scene: [GameScene],
+	// scene: [IntroScene, GameScene],
 }
 
 export default new Phaser.Game(config)
