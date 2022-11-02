@@ -16,7 +16,10 @@ export default class GameScene extends Phaser.Scene {
     this.catX = undefined;
     this.catY = undefined;
     this.catsGroup = undefined;
-    this.gameTime = undefined;
+    this.timeNow = undefined;
+
+    this.countDown = 60;
+    this.isGameOver = false;
   }
 
   init(data) {
@@ -81,13 +84,21 @@ export default class GameScene extends Phaser.Scene {
       null,
       this
     );
+
+    // this.countDown = 60000;
+    this.timeNow = this.time.delayedCall(60000, this.#followCountdown, [], this);
   }
 
   update() {
-    this.gameTime = this.sys.game.loop.time.toFixed(0).toString();
-    this.timeLabel.setTextValue(this.gameTime);
+    if (this.isGameOver) {
+      return;
+    }
 
-    this.#setRandomCatCoordinates()
+    this.timeLabel.setTextValue(
+      Number(this.countDown - this.timeNow.getElapsedSeconds()).toFixed(0)
+    );
+
+    this.#setRandomCatCoordinates();
 
     // Player Movements
     if (this.cursors.left.isDown) {
@@ -142,7 +153,6 @@ export default class GameScene extends Phaser.Scene {
     return player;
   }
 
-
   #petCat(player, cat) {
     cat.destroy();
 
@@ -165,4 +175,12 @@ export default class GameScene extends Phaser.Scene {
     this.catX = Phaser.Math.Between(0, 1024);
     this.catY = Phaser.Math.Between(0, 650);
   }
+
+  #followCountdown() {
+    this.physics.pause();
+    this.player.anims.stop();
+    this.player.setTint(0xff0000);
+    this.isGameOver = true;
+  }
+
 }
