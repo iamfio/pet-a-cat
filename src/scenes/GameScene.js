@@ -1,4 +1,7 @@
 import Phaser from "phaser";
+import LabelContainer from "../ui/LabelContainer";
+import ScoreLabel from "../ui/ScoreLabel";
+// import TimeLabel from "../ui/TimeLabel";
 import CatSpawner from "./spawner/CatSpawner";
 
 const PLAYER_KEY = "player";
@@ -10,6 +13,7 @@ export default class GameScene extends Phaser.Scene {
     this.player = undefined;
     this.cursors = undefined;
     this.catSpawner = undefined;
+    this.scoreLabel = undefined;
   }
 
   init(data) {
@@ -45,24 +49,27 @@ export default class GameScene extends Phaser.Scene {
     const map = this.make.tilemap({ key: "map" });
     const tileset = map.addTilesetImage("jungle_terrain", "tiles");
     const platforms = map.createLayer("Platforms", tileset, 0, 0);
-    const overlays = map.createLayer("Overlays", tileset, 0, 0);
+    map.createLayer("Overlays", tileset, 0, 0);
 
     platforms.setCollisionByExclusion([-1], true);
     platforms.setBlendMode("SCREEN");
 
     this.player = this.#createPlayer();
     this.cat = this.#createCat();
-    this.physics.add.collider(this.player, platforms);
-    this.physics.add.collider(this.cat, platforms);
+    this.scoreLabel = this.#createScoreLabel(16, 16, 0)
+    this.timeLabel = this.#createTimeLabel(264, 16, 0)
 
+    
     this.cursors = this.input.keyboard.createCursorKeys();
-
+    
     this.catSpawner = new CatSpawner(this, CAT_KEY);
     const catsGroup = this.catSpawner.group;
-    // this.catSpawner.spawn(player.x)
-
+    
+    // Colliders
+    this.physics.add.collider(this.player, platforms);
+    this.physics.add.collider(this.cat, platforms);
     this.physics.add.collider(catsGroup, platforms);
-    // this.physics.add.collider(this.player, catsGroup, this.#petCat, null, this);
+    this.physics.add.collider(this.player, this.cat, this.#petCat, null, this);
   }
 
   update() {
@@ -85,6 +92,8 @@ export default class GameScene extends Phaser.Scene {
       this.player.setVelocityY(-350);
       this.player.play("jump", true);
     }
+
+    this.cat.play("turn", true)
   }
 
   #createPlayer() {
@@ -119,7 +128,8 @@ export default class GameScene extends Phaser.Scene {
   }
 
   #createCat() {
-    const cat = this.physics.add.sprite(0, 0, CAT_KEY);
+    // const cat = this.physics.add.sprite(0, 0, CAT_KEY);
+    const cat = this.physics.add.sprite(80, 650, CAT_KEY);
     cat.setBounce(0.1);
     cat.setCollideWorldBounds(true);
     cat.scale *= 1.5;
@@ -138,10 +148,37 @@ export default class GameScene extends Phaser.Scene {
       repeat: -1,
     });
 
+    this.anims.create({
+      key: "turn",
+      frames: [{ key: CAT_KEY, frame: 6 }],
+    })
+
     return cat;
   }
 
   #petCat(player, cat) {
-    player.setTint(0x155437);
+    // player.setTint(0x155437);
+    cat.disableBody(true, true)
+
+    this.scoreLabel.add(1)
+  }
+
+  #createScoreLabel(x, y, score) {
+    const style = { fontSize: "36px", fill: "#fff"}
+    const label = new LabelContainer(this, x, y, "Score", score, style);
+
+    this.add.existing(label)
+
+    return label
+  }
+
+  #createTimeLabel(x, y, score) {
+    const style = { fontSize: "36px", fill: "#fff"}
+    const label = new LabelContainer(this, x, y, "Time", score, style);
+    // const label = new ScoreLabel(this, x, y, "Score", score, style);
+
+    this.add.existing(label)
+
+    return label
   }
 }
