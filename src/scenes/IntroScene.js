@@ -31,17 +31,16 @@ export default class IntroScene extends Phaser.Scene {
     logo.scaleX /= 1.5;
     logo.scaleY /= 1.5;
 
-    const centerX = this.game.config.width / 2;
-    const centerY = this.game.config.height / 5;
+    const cX = this.game.canvas.width / 2;
+    const cY = this.game.canvas.height / 5;
 
     const gameTitleConfig = {
       fontSize: "62px",
       color: "#fff",
       fontFamily: "JetBrains Mono",
     };
-    this.add
-      .text(centerX, centerY, "Pet - A - Cat", gameTitleConfig)
-      .setOrigin(0.5);
+
+    this.add.text(cX, cY, "Pet - A - Cat", gameTitleConfig).setOrigin(0.5);
 
     logo.setVelocity(100, 200);
     logo.setBounce(1, 1);
@@ -49,10 +48,9 @@ export default class IntroScene extends Phaser.Scene {
 
     emitter.startFollow(logo);
 
-    // this.physics.add.collider(gameTitle, logo)
     this.input.on(
       "pointerup",
-      (pointer) => this.scene.start("game-scene", { message: "Go!" }),
+      () => this.scene.start("game-scene", { message: "Go!" }),
       this
     );
     // this.time.addEvent({

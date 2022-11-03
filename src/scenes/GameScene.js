@@ -2,6 +2,8 @@ import Phaser from "phaser";
 import LabelContainer from "../ui/LabelContainer";
 import CatSpawner from "./spawner/CatSpawner";
 
+const COUNTDOWN = 60;
+
 const PLAYER_KEY = "player";
 const CAT_KEY = "cat";
 
@@ -18,12 +20,13 @@ export default class GameScene extends Phaser.Scene {
     this.catsGroup = undefined;
     this.timeNow = undefined;
 
-    this.countDown = 60;
     this.isGameOver = false;
   }
 
   init(data) {
     this.message = data.message;
+    this.worldW = this.game.canvas.width;
+    this.worldH = this.game.canvas.height;
   }
 
   preload() {
@@ -45,13 +48,10 @@ export default class GameScene extends Phaser.Scene {
   }
 
   create() {
-    const space = this.add.image(
-      this.game.canvas.width / 2,
-      this.game.canvas.height / 2,
-      "space"
-    );
+    const space = this.add.image(this.worldW / 2, this.worldH / 2, "space");
     space.scale *= 1.5;
 
+    // Environment
     const map = this.make.tilemap({ key: "map" });
     const tileset = map.addTilesetImage("jungle_terrain", "tiles");
     this.platforms = map.createLayer("Platforms", tileset, 0, 0);
@@ -60,16 +60,21 @@ export default class GameScene extends Phaser.Scene {
     this.platforms.setCollisionByExclusion([-1], true);
     this.platforms.setBlendMode("SCREEN");
 
+    // Player
     this.player = this.#createPlayer();
 
+    // this.cameras.main.setViewport()
     // new coordinates for the new cat respawn
     this.#setRandomCatCoordinates();
 
+    // UI
     this.scoreLabel = this.#createTextabel(16, 16, "Score", 0);
     this.timeLabel = this.#createTextabel(264, 16, "Time", 0);
 
+    // Keyboard navigation
     this.cursors = this.input.keyboard.createCursorKeys();
 
+    // Creating cat
     this.catSpawner = new CatSpawner(this, CAT_KEY);
     this.catsGroup = this.catSpawner.group;
     this.catSpawner.spawn(this.player.x);
@@ -85,8 +90,37 @@ export default class GameScene extends Phaser.Scene {
       this
     );
 
-    // this.countDown = 60000;
-    this.timeNow = this.time.delayedCall(60000, this.#followCountdown, [], this);
+    this.timeNow = this.time.delayedCall(
+      COUNTDOWN * 1000,
+      this.#followCountdown,
+      [],
+      this
+    );
+
+    this.physics.scene.anims.create({
+      key: "left",
+      frames: this.physics.scene.anims.generateFrameNumbers(CAT_KEY, {
+        start: 0,
+        end: 1,
+      }),
+      frameRate: 5,
+      repeat: -1,
+    });
+
+    this.physics.scene.anims.create({
+      key: "right",
+      frames: this.physics.scene.anims.generateFrameNumbers(CAT_KEY, {
+        start: 4,
+        end: 5,
+      }),
+      frameRate: 5,
+      repeat: -1,
+    });
+
+    this.physics.scene.anims.create({
+      key: "turn",
+      frames: [{ key: CAT_KEY, frame: 6 }],
+    });
   }
 
   update() {
@@ -95,7 +129,7 @@ export default class GameScene extends Phaser.Scene {
     }
 
     this.timeLabel.setTextValue(
-      Number(this.countDown - this.timeNow.getElapsedSeconds()).toFixed(0)
+      Number(COUNTDOWN - this.timeNow.getElapsedSeconds()).toFixed(0)
     );
 
     this.#setRandomCatCoordinates();
@@ -182,5 +216,4 @@ export default class GameScene extends Phaser.Scene {
     this.player.setTint(0xff0000);
     this.isGameOver = true;
   }
-
 }
