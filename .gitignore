@@ -23,3 +23,6 @@ dist-ssr
 *.sln
 *.sw?
 src/scenes/StateScene.js
+
+# Local Netlify folder
+.netlify
