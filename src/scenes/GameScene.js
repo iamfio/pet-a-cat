@@ -3,13 +3,13 @@ import LabelContainer from "../ui/LabelContainer";
 import CatSpawner from "./spawner/CatSpawner";
 
 // Game countdown time amount (in sec)
-const COUNTDOWN = 30;
+const COUNTDOWN = 10;
 
 // Step for counting scores
 const SCORE_AMOUNT = 1;
 
 // Min score to complete level
-const MIN_SCORE = 5;
+const MIN_SCORE = 1;
 
 // Key for sprites
 const PLAYER_KEY = "player";
@@ -33,6 +33,7 @@ export default class GameScene extends Phaser.Scene {
 
     this.timeNow = undefined;
     this.currentScore = 0;
+    this.totalScore = 0;
 
     this.isGameOver = false;
   }
@@ -193,6 +194,13 @@ export default class GameScene extends Phaser.Scene {
       repeat: -1,
     });
 
+    this.anims.create({
+      key: "jump",
+      frames: this.anims.generateFrameNumbers(PLAYER_KEY, { start: 1, end: 2 }),
+      frameRate: 10,
+      repeat: -1,
+    });
+
     return player;
   }
 
@@ -224,27 +232,31 @@ export default class GameScene extends Phaser.Scene {
   }
 
   #followCountdown() {
-    this.physics.pause()
+    let sceneName = "";
+
+    this.physics.pause();
     this.player.play("idle");
     this.player.setVelocity(0, 0);
 
+    this.totalScore += this.currentScore;
+
     if (this.currentScore < MIN_SCORE) {
-      this.isGameOver = true;    
+      this.isGameOver = true;
       this.player.setTint(0xff0000);
+      sceneName = "gameover";
     } else {
       this.isGameOver = false;
       this.player.setTint(0x501277);
-    }
-
-    let sceneName = "";
-    if (this.isGameOver) {
-      sceneName = "gameover";
-    } else {
-      sceneName = "intro";
+      sceneName = "game";
     }
 
     setTimeout(() => {
-      this.scene.start(`${sceneName}-scene`, { score: this.currentScore });
+      if (this.isGameOver) {
+        this.scene.start(`${sceneName}-scene`, { score: this.totalScore });
+      } else {
+        this.currentScore = 0;
+        this.scene.start(`${sceneName}-scene`);
+      }
     }, 2000);
   }
 }
