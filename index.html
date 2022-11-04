@@ -17,6 +17,7 @@
         flex-direction: column;
         justify-content: center;
         align-items: center;
+        text-align: center;
       }
       footer {
         margin-top: 60px;
@@ -24,6 +25,14 @@
       footer a {
         color: rgba(255, 255, 255, 0.555);
         text-decoration: none;
+        font-size: 12px;
+      }
+      footer .control {
+        padding: 20px;
+        color: rgba(255, 255, 255, 0.555);
+      }
+      .arrows {
+        font-size: 20px;
       }
     </style>
     <script type="module" crossorigin src="https://iamfio.github.io/pet-a-cat/assets/index.6c710290.js"></script>
@@ -34,25 +43,33 @@
     <div id="app"></div>
     
     <footer>
-      <a href="https://github.com/iamfio/" rel="noopener" target="_blank">
-        Created by: Fiodor
-      </a>
-      |
-      <a
-        href="https://github.com/iamfio/pet-a-cat/"
-        rel="noopener"
-        target="_blank"
-      >
-        GitHub Repo
-      </a>
-      |
-      <a
-        href="https://github.com/iamfio/pet-a-cat/blob/main/LICENSE"
-        rel="noopener"
-        target="_blank"
-      >
-        MIT Licence
-      </a>
+      <div class="control">
+        <p>
+          use arrow keys <span class="arrows">[←, ↑, ↓, →]</span> to move your
+          player
+        </p>
+      </div>
+      <div class="links">
+        <a href="https://github.com/iamfio/" rel="noopener" target="_blank">
+          Created by: Fiodor
+        </a>
+        |
+        <a
+          href="https://github.com/iamfio/pet-a-cat/"
+          rel="noopener"
+          target="_blank"
+        >
+          GitHub Repo
+        </a>
+        |
+        <a
+          href="https://github.com/iamfio/pet-a-cat/blob/main/LICENSE"
+          rel="noopener"
+          target="_blank"
+        >
+          MIT Licence
+        </a>
+      </div>
     </footer>
   </body>
 </html>
