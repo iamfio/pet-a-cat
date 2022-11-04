@@ -33,7 +33,11 @@ export default class GameOverScene extends Phaser.Scene {
     this.add.text(cX / 2, cY / 2, "Game Over!", textStyle).setOrigin(0.5);
 
     this.add
-      .text(cX / 2, cY / 3, `Total petted: ${this.score}`, scoreStyle)
+      .text(cX / 2, cY / 3, 
+      `Total Petted 
+      
+      ${this.score}
+      `, scoreStyle)
       .setOrigin(0.5);
 
     this.input.on("pointerup", () => this.scene.start("intro-scene"), this);

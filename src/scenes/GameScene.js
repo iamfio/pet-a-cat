@@ -242,14 +242,14 @@ export default class GameScene extends Phaser.Scene {
     this.player.play("idle");
     this.player.setVelocity(0, 0);
 
-    this.totalScore += this.currentScore;
-
     if (this.currentScore < MIN_SCORE) {
       this.isGameOver = true;
       this.player.setTint(0xff0000);
       sceneName = "gameover";
     } else {
       this.isGameOver = false;
+      this.totalScore += this.currentScore;
+
       this.player.setTint(0x501277);
       sceneName = "game";
     }
@@ -257,6 +257,7 @@ export default class GameScene extends Phaser.Scene {
     setTimeout(() => {
       if (this.isGameOver) {
         this.scene.start(`${sceneName}-scene`, { score: this.totalScore });
+        this.totalScore = 0;
       } else {
         this.currentScore = 0;
         this.scene.start(`${sceneName}-scene`);
