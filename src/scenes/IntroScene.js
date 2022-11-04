@@ -27,36 +27,33 @@ export default class IntroScene extends Phaser.Scene {
       blendMode: "ADD",
     });
 
-    const logo = this.physics.add.image(400, 100, "logo");
+    const logo = this.physics.add.image(400, 200, "logo");
     logo.scaleX /= 1.5;
     logo.scaleY /= 1.5;
 
     const cX = this.game.canvas.width / 2;
-    const cY = this.game.canvas.height / 5;
+    const cY = this.game.canvas.height / 3;
 
     const gameTitleConfig = {
-      fontSize: "62px",
-      color: "#fff",
+      fontSize: "70px",
       fontFamily: "JetBrains Mono",
+      fontWeight: "bold",
+      lineHeight: 2,
+      color: "#fff",
     };
 
-    this.add.text(cX, cY, "Pet - A - Cat", gameTitleConfig).setOrigin(0.5);
+    this.add.text(cX, cY, "Pæt - A - Cæt", gameTitleConfig).setOrigin(0.5);
 
-    logo.setVelocity(100, 200);
-    logo.setBounce(1, 1);
+    logo.setVelocity(100, 400);
+    logo.setBounce(0.7, 0.7);
     logo.setCollideWorldBounds(true);
 
     emitter.startFollow(logo);
 
     this.input.on(
       "pointerup",
-      () => this.scene.start("game-scene", { message: "Go!" }),
+      () => this.scene.start("game-scene"),
       this
     );
-    // this.time.addEvent({
-    //   delay: 2500,
-    //   loop: false,
-    //   callback: () => this.scene.start("game-scene", { message: "Go!" }),
-    // });
   }
 }

@@ -2,8 +2,16 @@ import Phaser from "phaser";
 import LabelContainer from "../ui/LabelContainer";
 import CatSpawner from "./spawner/CatSpawner";
 
-const COUNTDOWN = 60;
+// Game countdown time amount (in sec)
+const COUNTDOWN = 30;
 
+// Step for counting scores
+const SCORE_AMOUNT = 1;
+
+// Min score to complete level
+const MIN_SCORE = 5;
+
+// Key for sprites
 const PLAYER_KEY = "player";
 const CAT_KEY = "cat";
 
@@ -18,18 +26,20 @@ export default class GameScene extends Phaser.Scene {
     this.catX = undefined;
     this.catY = undefined;
     this.catsGroup = undefined;
+
+    this.emitter = undefined;
+
+    this.scoreLabel = undefined;
+
     this.timeNow = undefined;
+    this.currentScore = 0;
 
     this.isGameOver = false;
   }
 
-  init(data) {
-    this.message = data.message;
+  preload() {
     this.worldW = this.game.canvas.width;
     this.worldH = this.game.canvas.height;
-  }
-
-  preload() {
     this.load.setPath("assets/");
     this.load.image("space", "skies/space4.png");
 
@@ -48,6 +58,8 @@ export default class GameScene extends Phaser.Scene {
   }
 
   create() {
+    this.emitter = new Phaser.Events.EventEmitter();
+
     const space = this.add.image(this.worldW / 2, this.worldH / 2, "space");
     space.scale *= 1.5;
 
@@ -63,12 +75,12 @@ export default class GameScene extends Phaser.Scene {
     // Player
     this.player = this.#createPlayer();
 
-    // this.cameras.main.setViewport()
     // new coordinates for the new cat respawn
     this.#setRandomCatCoordinates();
 
     // UI
     this.scoreLabel = this.#createTextabel(16, 16, "Score", 0);
+
     this.timeLabel = this.#createTextabel(264, 16, "Time", 0);
 
     // Keyboard navigation
@@ -121,13 +133,11 @@ export default class GameScene extends Phaser.Scene {
       key: "turn",
       frames: [{ key: CAT_KEY, frame: 6 }],
     });
+
+    this.emitter.on("count-score", this.#countScore, this);
   }
 
   update() {
-    if (this.isGameOver) {
-      return;
-    }
-
     this.timeLabel.setTextValue(
       Number(COUNTDOWN - this.timeNow.getElapsedSeconds()).toFixed(0)
     );
@@ -173,7 +183,6 @@ export default class GameScene extends Phaser.Scene {
     this.anims.create({
       key: "idle",
       frames: [{ key: PLAYER_KEY, frame: 1 }],
-      // frames: this.anims.generateFrameNumbers(PLAYER_KEY, { start: 0, end: 2 }),
       frameRate: 10,
     });
 
@@ -187,13 +196,17 @@ export default class GameScene extends Phaser.Scene {
     return player;
   }
 
-  #petCat(player, cat) {
-    cat.destroy();
+  #countScore(score) {
+    this.currentScore += score;
+  }
 
-    this.scoreLabel.add(1);
+  #petCat(player, cat) {
+    this.emitter.emit("count-score", SCORE_AMOUNT);
+
+    cat.destroy();
     this.catSpawner.spawn(player.x, this.catY);
 
-    this.physics.add.collider(cat, this.player, this.#petCat, null, this);
+    this.scoreLabel.add(SCORE_AMOUNT);
   }
 
   #createTextabel(x, y, labelText, value) {
@@ -211,9 +224,27 @@ export default class GameScene extends Phaser.Scene {
   }
 
   #followCountdown() {
-    this.physics.pause();
-    this.player.anims.stop();
-    this.player.setTint(0xff0000);
-    this.isGameOver = true;
+    this.physics.pause()
+    this.player.play("idle");
+    this.player.setVelocity(0, 0);
+
+    if (this.currentScore < MIN_SCORE) {
+      this.isGameOver = true;    
+      this.player.setTint(0xff0000);
+    } else {
+      this.isGameOver = false;
+      this.player.setTint(0x501277);
+    }
+
+    let sceneName = "";
+    if (this.isGameOver) {
+      sceneName = "gameover";
+    } else {
+      sceneName = "intro";
+    }
+
+    setTimeout(() => {
+      this.scene.start(`${sceneName}-scene`, { score: this.currentScore });
+    }, 2000);
   }
 }
