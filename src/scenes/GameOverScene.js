@@ -19,13 +19,13 @@ export default class GameOverScene extends Phaser.Scene {
     this.load.image("space", "skies/space4.png");
 
     const textStyle = {
-      fontFamily: "JetBrains Mono",
+      fontFamily: "Kongtext",
       fontSize: "64px",
       color: "#663399",
     };
 
     const scoreStyle = {
-      fontFamily: "JetBrains Mono",
+      fontFamily: "Kongtext",
       fontSize: "32px",
       color: "#fff",
     };

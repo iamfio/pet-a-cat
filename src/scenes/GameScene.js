@@ -3,13 +3,13 @@ import LabelContainer from "../ui/LabelContainer";
 import CatSpawner from "./spawner/CatSpawner";
 
 // Game countdown time amount (in sec)
-const COUNTDOWN = 10;
+const COUNTDOWN = 20;
 
 // Step for counting scores
 const SCORE_AMOUNT = 1;
 
 // Min score to complete level
-const MIN_SCORE = 1;
+const MIN_SCORE = 5;
 
 // Key for sprites
 const PLAYER_KEY = "player";
@@ -82,7 +82,7 @@ export default class GameScene extends Phaser.Scene {
     // UI
     this.scoreLabel = this.#createTextabel(16, 16, "Score", 0);
 
-    this.timeLabel = this.#createTextabel(264, 16, "Time", 0);
+    this.timeLabel = this.#createTextabel(327, 16, "Time", 0);
 
     // Keyboard navigation
     this.cursors = this.input.keyboard.createCursorKeys();
@@ -218,7 +218,11 @@ export default class GameScene extends Phaser.Scene {
   }
 
   #createTextabel(x, y, labelText, value) {
-    const style = { fontSize: "36px", fill: "#fff" };
+    const style = {
+      fontFamily: "Kongtext",
+      fontSize: "28px",
+      fill: "#F6FCF2",
+    };
     const label = new LabelContainer(this, x, y, labelText, value, style);
 
     this.add.existing(label);

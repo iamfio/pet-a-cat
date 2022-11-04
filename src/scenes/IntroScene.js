@@ -35,14 +35,14 @@ export default class IntroScene extends Phaser.Scene {
     const cY = this.game.canvas.height / 3;
 
     const gameTitleConfig = {
+      fontFamily: "Kongtext",
       fontSize: "70px",
-      fontFamily: "JetBrains Mono",
       fontWeight: "bold",
       lineHeight: 2,
       color: "#fff",
     };
 
-    this.add.text(cX, cY, "Pæt - A - Cæt", gameTitleConfig).setOrigin(0.5);
+    this.add.text(cX, cY, "Pet-A-Cat", gameTitleConfig).setOrigin(0.5);
 
     logo.setVelocity(100, 400);
     logo.setBounce(0.7, 0.7);
@@ -50,10 +50,6 @@ export default class IntroScene extends Phaser.Scene {
 
     emitter.startFollow(logo);
 
-    this.input.on(
-      "pointerup",
-      () => this.scene.start("game-scene"),
-      this
-    );
+    this.input.on("pointerup", () => this.scene.start("game-scene"), this);
   }
 }
